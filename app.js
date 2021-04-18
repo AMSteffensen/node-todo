@@ -3,14 +3,17 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+const dotenv = require("dotenv");
+const _ = require("lodash");
 const app = express();
 
 app.set("view engine", "ejs");
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
+dotenv.config()
 
-mongoose.connect("mongodb://localhost:27017/todolistDB", {
+mongoose.connect(`mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.59zwa.mongodb.net/todolistDB`, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
@@ -104,7 +107,7 @@ app.get("/article/:id", function (req, res) {
 });
 
 app.get("/:customListName", function (req, res) {
-  const customListName = req.params.customListName;
+  const customListName = _.capitalize(req.params.customListName);
   List.findOne({ name: customListName }, function (err, foundList) {
     if (!err) {
       if (!foundList) {
@@ -129,6 +132,11 @@ app.get("/about", function (req, res) {
   res.render("about");
 });
 
-app.listen(3000, function () {
-  console.log("Server started on port 3000");
+let port = process.env.PORT;
+if (port == null || port == "") {
+  port = 3000;
+}
+
+app.listen(port, function () {
+  console.log(`Server started successfully on ${port}`);
 });
